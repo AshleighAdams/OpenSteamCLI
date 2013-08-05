@@ -2,6 +2,7 @@
 #define OPENSTEAMCLI_FRIENDSFORM_H
 
 #include "Form.hpp"
+#include "FriendControl.hpp"
 
 // Consor
 #include <Consor/Containers/FlowContainer.hpp>
@@ -20,11 +21,10 @@ class FriendsForm : public Form
 	Consor::Button               _LogoutButton;
 	Consor::Label                _StatusLabel;
 	
-	std::list<Consor::Control*>  _Controls;
+	std::list<FriendControl*>    _Controls;
 	std::string                  _Username, _Password;
 	
 	void _LogoutButton_Click();
-	bool _Login();
 	void _UpdateStatus(const std::string& status);
 public:
 	FriendsForm(const std::string& username, const std::string& password);

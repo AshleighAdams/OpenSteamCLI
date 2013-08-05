@@ -36,18 +36,6 @@ FriendsForm::FriendsForm(const string& username, const string& password)
 void FriendsForm::_UpdateStatus(const string& status)
 {
 	_StatusLabel.SetText(status);
-	Util::Log("setting status to `%'", status);
-}
-
-bool FriendsForm::_Login()
-{
-	
-	
-	
-	
-	Util::MessageBox("This hasn't been implimented yet!", "Not Implimented", {"OK"});
-	
-	return false;
 }
 
 void FriendsForm::Run()
@@ -55,8 +43,7 @@ void FriendsForm::Run()
 	Sc::SteamClient client;
 	Sc::SteamUser user(client);
 	Sc::SteamFriends friends(client);
-	
-	
+		
 	client.OnConnect->Add([&](Sc::ConnectEvent ev)
 	{
 		if(ev.result == Sc::EResult_OK)
@@ -92,15 +79,37 @@ void FriendsForm::Run()
 			Util::Log("successfully logged in");
 			this->_UpdateStatus("Online");
 			friends.SetPersonaState(Sc::EPersonaState_Online);
+			
+			int fnds = friends.GetFriendCount();
+			Util::Log("has % friends", fnds);
+			
+			for(int i = 0; i < fnds; i++)
+			{
+				Sc::SteamId sid = friends.GetFriendSteamId(i);
+				const Sc::Persona& frnd = friends.GetPersonaInfo(sid);
+				
+				FriendControl* pControl = new FriendControl(friends, sid);
+				
+				_Controls.push_back(pControl);
+				_MainFlow.AddControl(*pControl);
+			}
 		}
 		else
 		{
 			Util::Log("couldn't log in: password incorrect");
+			Util::MessageBox("Password incorrect, or Steam Guard!", "Can't login", {"OK"});
+			this->Close();
 		}
 	});
 	
+	friends.OnPersonaUpdate->Add([&](Sc::PersonaUpdateEvent ev)
+	{
+		for(FriendControl* pControl : _Controls)
+			pControl->Update();
+	});
+	
 	Util::Log("attempting to login as `%'", this->_Username);
-	this->_UpdateStatus("connecting...");
+	this->_UpdateStatus("connecting");
 	
 	client.Connect();
 	
