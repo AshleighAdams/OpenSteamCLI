@@ -1,7 +1,14 @@
 
 #include "FriendsForm.hpp"
+
+// Consor
 #include <Consor/Util/Debug.hpp>
 #include <Consor/Util/Prompts.hpp>
+
+// OpenSteamClient
+#include <OpenSteamClient/SteamClient.hpp>
+#include <OpenSteamClient/SteamUser.hpp>
+#include <OpenSteamClient/SteamFriends.hpp>
 
 using namespace std;
 using namespace Consor;
@@ -34,9 +41,9 @@ void FriendsForm::_UpdateStatus(const string& status)
 
 bool FriendsForm::_Login()
 {
-	this->_UpdateStatus("connecting...");
 	
-	Util::Log("attempting to login as `%'", this->_Username);
+	
+	
 	
 	Util::MessageBox("This hasn't been implimented yet!", "Not Implimented", {"OK"});
 	
@@ -45,14 +52,64 @@ bool FriendsForm::_Login()
 
 void FriendsForm::Run()
 {
-	if(!this->_Login())
-		return;
+	Sc::SteamClient client;
+	Sc::SteamUser user(client);
+	Sc::SteamFriends friends(client);
 	
-	while(true)
+	
+	client.OnConnect->Add([&](Sc::ConnectEvent ev)
 	{
-		if(_Closed)
+		if(ev.result == Sc::EResult_OK)
+		{
+			Util::Log("connected; logging in...");
+			this->_UpdateStatus("logging in");
+			
+			Sc::LoginDetails details;
+			
+			details.username = this->_Username;
+			details.password = this->_Password;
+			
+			user.LogIn(details);
+			return;
+		}
+		
+		if(Util::MessageBox("Failed to connect to Steam's servers!", "Error", {"Cancel", "Retry"}) == "Cancel")
+			this->Close();
+		else
+			client.Connect();
+	});
+	
+	client.OnDisconnect->Add([&](Sc::DisconnectEvent ev)
+	{
+		Util::Log("disconnected");
+		this->Close();
+	});
+	
+	user.OnLoggedIn->Add([&](Sc::LoggedInEvent ev)
+	{
+		if(ev.result == Sc::EResult_OK)
+		{
+			Util::Log("successfully logged in");
+			this->_UpdateStatus("Online");
+			friends.SetPersonaState(Sc::EPersonaState_Online);
+		}
+		else
+		{
+			Util::Log("couldn't log in: password incorrect");
+		}
+	});
+	
+	Util::Log("attempting to login as `%'", this->_Username);
+	this->_UpdateStatus("connecting...");
+	
+	client.Connect();
+	
+	while(client.IsConnected())
+	{
+		if(this->_Closed)
 			break;
 		
+		client.Run(5000);
 	}
 }
 

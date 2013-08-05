@@ -48,18 +48,20 @@ int main(int argc, char** argv)
 	
 	LogRelated::LoadLogger();
 	
-	LoginForm loginform;
-	
-	while(true)
 	{
-		if(loginform.Show() == FormResult::Cancel)
-			break;
-			
-		string user = loginform.GetUsername();
-		string pass = loginform.GetPassword();
+		LoginForm loginform;
 		
-		FriendsForm ff(user, pass);
-		ff.Show(Vector(1, 1));
+		while(true)
+		{
+			if(loginform.Show() == FormResult::Cancel)
+				break;
+				
+			string user = loginform.GetUsername();
+			string pass = loginform.GetPassword();
+			
+			FriendsForm ff(user, pass);
+			ff.Show(Vector(1, 1));
+		}
 	}
 	
 	LogRelated::UnloadLogger();
