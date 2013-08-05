@@ -9,6 +9,7 @@
 #include <Consor/Controls/Label.hpp>
 #include "Form.hpp"
 
+#include <string>
 
 class LoginForm : public Form
 {
@@ -25,6 +26,8 @@ class LoginForm : public Form
 	void _ButtonCancel_Click();
 public:
 	LoginForm();
+	std::string GetUsername();
+	std::string GetPassword();
 };
 
 #endif //OPENSTEAMCLI_LOGINFORM_H

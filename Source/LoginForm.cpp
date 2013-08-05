@@ -11,13 +11,6 @@ LoginForm::LoginForm() :
 	                  _FlowButtons(Consor::FlowContainer::FlowAxis::Horizontal, 2),
 	                  _FlowButtonsAlign(_FlowButtons, Consor::AlignContainer::Axis::Horizontal, Consor::AlignContainer::Align::Center)
 {
-	//Consor::FlowContainer _FlowMain, _FlowLabels, _FlowControls, _FlowButtons;
-	
-	//Consor::Label         _LabelUser, _LabelPassword;
-	//Consor::TextBox       _TextBoxUser;
-	//Consor::PasswordBox   _PasswordBoxPassword;
-	//Consor::Button        _ButtonLogin, _ButtonCancel;
-	
 	// the layout
 	_FlowMain.AddControl(_FlowTable);
 	_FlowMain.AddControl(_FlowButtonsAlign);
@@ -48,9 +41,20 @@ LoginForm::LoginForm() :
 	_ButtonCancel.Click += std::bind(&LoginForm::_ButtonCancel_Click, this);
 }
 
+std::string LoginForm::GetUsername()
+{
+	return this->_TextBoxUser.GetText();
+}
+
+std::string LoginForm::GetPassword()
+{
+	return this->_PasswordBoxPassword.GetPassword();
+}
+
 void LoginForm::_ButtonLogin_Click()
 {
-	throw "Not implimented";
+	this->_FormResult = FormResult::OK;
+	this->Close();
 }
 
 void LoginForm::_ButtonCancel_Click()

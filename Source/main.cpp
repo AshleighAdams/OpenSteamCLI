@@ -12,12 +12,14 @@
 
 #include <Consor/Util/Prompts.hpp>
 #include <Consor/Util/Time.hpp>
+#include <Consor/Util/Debug.hpp>
 #include <Consor/WindowSystem.hpp>
 #include <Consor/Controls/ProgressBar.hpp>
 #include <Consor/Containers/ScrollContainer.hpp>
 
 // OpenSteamCLI
 #include "LoginForm.hpp"
+#include "FriendsForm.hpp"
 
 using namespace std;
 using namespace Consor;
@@ -46,12 +48,18 @@ int main(int argc, char** argv)
 	
 	LogRelated::LoadLogger();
 	
+	LoginForm loginform;
+	
 	while(true)
 	{
-		LoginForm loginform;
-		
 		if(loginform.Show() == FormResult::Cancel)
 			break;
+			
+		string user = loginform.GetUsername();
+		string pass = loginform.GetPassword();
+		
+		FriendsForm ff(user, pass);
+		ff.Show(Vector(1, 1));
 	}
 	
 	LogRelated::UnloadLogger();

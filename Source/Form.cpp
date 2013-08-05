@@ -21,6 +21,7 @@ FormResult Form::Show(const Vector& pos)
 {
 	WindowSystem::RegisterWindow(*this, pos);
 
+	this->_Closed = false;
 	this->Run();
 	this->Close();
 
