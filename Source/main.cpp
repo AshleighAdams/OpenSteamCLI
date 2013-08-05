@@ -6,9 +6,121 @@
 #include <OpenSteamClient/SteamUser.hpp>
 #include <OpenSteamClient/SteamFriends.hpp>
 
-using namespace std;
+// Consor
+#include <Consor/PlatformConsoleRenderer.hpp>
+#include <Consor/PlatformInputSystem.hpp>
 
-int main()
+#include <Consor/Util/Prompts.hpp>
+#include <Consor/Util/Time.hpp>
+#include <Consor/WindowSystem.hpp>
+#include <Consor/Controls/ProgressBar.hpp>
+#include <Consor/Containers/ScrollContainer.hpp>
+
+// OpenSteamCLI
+#include "LoginForm.hpp"
+
+using namespace std;
+using namespace Consor;
+using namespace Consor::Input;
+using namespace Consor::Console;
+
+namespace LogRelated
+{
+	void LoadLogger();
+	void UnloadLogger();
+};
+
+
+int main(int argc, char** argv)
+{
+	Input::PlatformInputSystem input;
+	PlatformConsoleRenderer renderer;
+
+	renderer.SetTitle("Open Steam CLI");
+	
+	WindowSystem::Setup(&renderer, &input); // so it doesn't crash upon Ctrl-C
+	atexit([]()
+	{
+		WindowSystem::Close();
+	});
+	
+	LogRelated::LoadLogger();
+	
+	while(true)
+	{
+		LoginForm loginform;
+		
+		if(loginform.Show() == FormResult::Cancel)
+			break;
+	}
+	
+	LogRelated::UnloadLogger();
+	return 0;
+}
+
+
+
+namespace LogRelated
+{
+	FlowContainer _Flow(FlowContainer::FlowAxis::Vertical, 0);
+
+	ScrollContainer _Scroll(_Flow, Size(-1, 16));
+	WindowContainer _Window(_Scroll, "Debug Log");
+
+	std::list<Control*> _ToDelete;
+	mutex _Lock;
+
+	void OnLog(const string& msg)
+	{
+		lock_guard<mutex> lock(_Lock); // safe for multithreading
+
+		Label& msglbl = *new Label;
+		_ToDelete.push_back(&msglbl);
+
+		msglbl.SetText(msg);
+		msglbl.ForceResize(Size(60, 1));
+
+		_Flow.AddControl(msglbl);
+
+		static bool HasScrolled = false;
+		if(!HasScrolled && _Scroll.ScrollDown(9999))
+			HasScrolled = true;
+
+		if(_ToDelete.size() > 100)
+		{
+			delete _ToDelete.front();
+			_ToDelete.pop_front();
+		}
+	}
+
+	void Toggle()
+	{
+		static bool visible = false;
+
+		if(!visible)
+			WindowSystem::RegisterWindow(_Window, Vector(0, -1));
+		else
+			WindowSystem::UnregisterWindow(_Window);;
+
+		visible = !visible;
+	}
+
+	void LoadLogger()
+	{
+		WindowSystem::RegisterHotKey(nullptr, Input::F2, false, false, Toggle);
+		Util::HookLog(OnLog);
+	}
+
+	void UnloadLogger()
+	{
+		WindowSystem::UnregisterWindow(_Window);
+		for(Control* pControl : _ToDelete)
+			delete pControl;
+	}
+}
+
+
+int main_test()
 {
 	Sc::SteamClient client;
 	Sc::SteamUser user(client);
