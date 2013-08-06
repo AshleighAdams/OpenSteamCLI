@@ -1,4 +1,7 @@
 #include "FriendControl.hpp"
+#include "ChatForm.hpp"
+
+#include <Consor/Util/Debug.hpp>
 
 using namespace std;
 
@@ -19,9 +22,10 @@ void FriendControl::Update()
 }
 
 bool FriendControl::HandleInput(Consor::Input::Key Key, Consor::Input::IInputSystem& System)
-{
+{	
 	if(Key == Consor::Input::Key::Enter)
 	{
+		this->Click(_Whom);
 		return true;
 	}
 	

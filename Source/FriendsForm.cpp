@@ -1,5 +1,6 @@
 
 #include "FriendsForm.hpp"
+#include "ChatForm.hpp"
 
 // Consor
 #include <Consor/Util/Debug.hpp>
@@ -90,6 +91,13 @@ void FriendsForm::Run()
 				
 				FriendControl* pControl = new FriendControl(friends, sid);
 				
+				pControl->Click += [&friends](Sc::SteamId id)
+				{
+					Util::Log("toggleing chat");
+					ChatForm& form = ChatForm::FromSteamId(id, friends);
+					form.Show();
+				};
+				
 				_Controls.push_back(pControl);
 				_MainFlow.AddControl(*pControl);
 			}
@@ -107,6 +115,7 @@ void FriendsForm::Run()
 		for(FriendControl* pControl : _Controls)
 			pControl->Update();
 	});
+	
 	
 	Util::Log("attempting to login as `%'", this->_Username);
 	this->_UpdateStatus("connecting");

@@ -9,6 +9,7 @@
 // Consor
 #include <Consor/Control.hpp>
 #include <Consor/Controls/Label.hpp>
+#include <Consor/Util/Hooks.hpp>
 
 class FriendControl : public Consor::Label
 {
@@ -18,6 +19,7 @@ class FriendControl : public Consor::Label
 public:
 	FriendControl(Sc::SteamFriends& friends, Sc::SteamId& steamid);
 	void Update();
+	Consor::Hook<Sc::SteamId> Click;
 	
 	virtual bool HandleInput(Consor::Input::Key Key, Consor::Input::IInputSystem& System);
 	virtual bool CanFocus();
